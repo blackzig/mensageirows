@@ -5,10 +5,17 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/tv_name_owner_mesagem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/red"
+        android:textSize="10dp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tv_subject"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/yellow"
         android:textSize="24dp"
@@ -16,7 +23,7 @@
 
     <TextView
         android:id="@+id/tv_message"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/yellow"
         android:textSize="24dp"

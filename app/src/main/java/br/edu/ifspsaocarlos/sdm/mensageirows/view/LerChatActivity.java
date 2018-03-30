@@ -1,11 +1,8 @@
 package br.edu.ifspsaocarlos.sdm.mensageirows.view;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -14,7 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import br.edu.ifspsaocarlos.sdm.mensageirows.R;
@@ -29,7 +27,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LerChatActivity extends AppCompatActivity {
 
-    EditText primeiroId, segundoId, idMensagem;
+    EditText idOrigem, idDestinatario, idMensagem;
     TextView cabecalhoMensagem;
     Button procurar;
     ListView listaChat;
@@ -45,8 +43,8 @@ public class LerChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ler_chat);
 
-        primeiroId = findViewById(R.id.et_digite_o_primeiro_id);
-        segundoId = findViewById(R.id.et_digite_o_segundo_id);
+        idOrigem = findViewById(R.id.et_digite_o_primeiro_id);
+        idDestinatario = findViewById(R.id.et_digite_o_segundo_id);
         idMensagem = findViewById(R.id.et_digite_o_id_da_mensagem);
         procurar = findViewById(R.id.bt_procurar);
         listaChat = findViewById(R.id.lv_lista_do_chat_entre_remetente_e_destinatario);
@@ -62,15 +60,16 @@ public class LerChatActivity extends AppCompatActivity {
 
         mensageiroApi = retrofit.create(MensageiroApi.class);
 
-          listaMensagensFinal.clear();
 
         procurar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                listaMensagensFinal.clear();
+
                 Call<List<Mensagem>> mensagensDoRemetente = mensageiroApi.getMensagems(
                         idMensagem.getText().toString(),
-                        primeiroId.getText().toString(),
-                        segundoId.getText().toString());
+                        idOrigem.getText().toString(),
+                        idDestinatario.getText().toString());
 
                 mensagensDoRemetente.enqueue(new Callback<List<Mensagem>>() {
 
@@ -83,38 +82,11 @@ public class LerChatActivity extends AppCompatActivity {
                                     + " e " + listaMensagensRemetente.get(0).getDestino().getNomeCompleto());
 
                             for (Mensagem m : listaMensagensRemetente) {
-                                Log.i("mens ", m.getCorpo());
                                 listaMensagensFinal.add(m);
                             }
 
-                            Call<List<Mensagem>> mensagensDoDestinatario = mensageiroApi.getMensagensDoDestinatario(
-                                    idMensagem.getText().toString(),
-                                    segundoId.getText().toString(),
-                                    primeiroId.getText().toString());
+                            mensagensDoDestinatario();
 
-                            mensagensDoDestinatario.enqueue(new Callback<List<Mensagem>>() {
-
-                                @Override
-                                public void onResponse(Call<List<Mensagem>> call, Response<List<Mensagem>> response) {
-                                    List<Mensagem> listaMensagensDestinatario = response.body();
-
-                                    if (!listaMensagensDestinatario.isEmpty()) {
-
-                                        for (Mensagem m : listaMensagensDestinatario) {
-                                            Log.i("men ", m.getCorpo());
-                                            listaMensagensFinal.add(m);
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<List<Mensagem>> call, Throwable t) {
-
-                                }
-                            });
-
-                            ChatAdapter messageAdapter = new ChatAdapter(listaMensagensFinal, LerChatActivity.this);
-                            listaChat.setAdapter(messageAdapter);
                         } else {
                             Toast.makeText(LerChatActivity.this, "Não há nenhuma mensagem.", Toast.LENGTH_SHORT).show();
                         }
@@ -125,6 +97,44 @@ public class LerChatActivity extends AppCompatActivity {
 
                     }
                 });
+            }
+        });
+
+    }
+
+    public void mensagensDoDestinatario() {
+        Call<List<Mensagem>> mensagensDoDestinatario = mensageiroApi.getMensagensDoDestinatario(
+                idMensagem.getText().toString(),
+                idDestinatario.getText().toString(),
+                idOrigem.getText().toString());
+
+        mensagensDoDestinatario.enqueue(new Callback<List<Mensagem>>() {
+
+            @Override
+            public void onResponse(Call<List<Mensagem>> call, Response<List<Mensagem>> response) {
+                List<Mensagem> listaMensagensDestinatario = response.body();
+
+                if (!listaMensagensDestinatario.isEmpty()) {
+
+                    for (Mensagem m : listaMensagensDestinatario) {
+                        listaMensagensFinal.add(m);
+                    }
+
+                    Collections.sort(listaMensagensFinal, new Comparator<Mensagem>() {
+                        @Override
+                        public int compare(Mensagem o1, Mensagem o2) {
+                            return o1.getId().compareTo(o2.getId());
+                        }
+                    });
+
+                    ChatAdapter messageAdapter = new ChatAdapter(listaMensagensFinal, LerChatActivity.this);
+                    listaChat.setAdapter(messageAdapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Mensagem>> call, Throwable t) {
+
             }
         });
 

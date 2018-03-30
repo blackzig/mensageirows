@@ -77,7 +77,7 @@
 
     <ListView
         android:id="@+id/lv_lista_do_chat_entre_remetente_e_destinatario"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
     </ListView>

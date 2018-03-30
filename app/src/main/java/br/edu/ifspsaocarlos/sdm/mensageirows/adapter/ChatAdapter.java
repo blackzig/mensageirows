@@ -1,9 +1,13 @@
 package br.edu.ifspsaocarlos.sdm.mensageirows.adapter;
 
+import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -47,19 +51,25 @@ public class ChatAdapter extends BaseAdapter {
 
         TextView subject = lineMessage.findViewById(R.id.tv_subject);
         TextView message = lineMessage.findViewById(R.id.tv_message);
+        TextView messageOwner = lineMessage.findViewById(R.id.tv_name_owner_mesagem);
 
         Mensagem messageChat = (Mensagem) getItem(position);
 
-        subject.setText("Assunto: " + messageChat.getAssunto());
-        message.setText("Mensagem: " + messageChat.getCorpo());
+        String idOrigemLista = messageChat.getOrigemId();
+        String idDestinoLista = messageChat.getDestinoId();
 
-        Integer itsEven = position % 2;
-
-        if (itsEven == 0) {
+        if ((Integer.parseInt(idOrigemLista) > Integer.parseInt(idDestinoLista))) {
+            messageOwner.setText("Enviado por: " + messageChat.getOrigem().getApelido());
             lineMessage.setBackgroundColor(Color.BLACK);
         } else {
+            messageOwner.setText("Enviado por: " + messageChat.getOrigem().getApelido());
             lineMessage.setBackgroundColor(Color.BLUE);
         }
+
+
+        subject.setText("Assunto: " + messageChat.getAssunto() + " " + messageChat.getId());
+        message.setText("Mensagem: " + messageChat.getCorpo());
+
 
         return lineMessage;
     }
